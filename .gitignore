@@ -127,6 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+<<<<<<< HEAD
 
 # added by me
 *.mat
