@@ -7,6 +7,7 @@ import math
 D = loadmat("../data/HICO.mat")
 hico_wl = D['hico_wl']
 HICO_original = D['HICO_original']
+land_mask = plt.imread('../data/land_mask.png')[:,:,0] == 0
 
 a = [0.3272, -2.9940, 2.7218, -1.2259, -0.5683]
 
@@ -38,7 +39,8 @@ for i in range(0,H):
 		denominator = I[i,j,lambda_green_idx]
 		for k in range(1,5):
 			intensity += a[k]*(math.log(numerator/denominator,10))**k
-		intensities[i,j] = intensity
+		intensities[i,j] = 10**intensity
+intensities[land_mask] = 0
 
 print("low intensity: ", intensities[48,12])
 print("high intensity: ", intensities[33,207])
