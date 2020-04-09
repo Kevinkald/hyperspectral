@@ -9,42 +9,52 @@ hico_wl = D['hico_wl']
 HICO_original = D['HICO_original']
 land_mask = plt.imread('../data/land_mask.png')[:,:,0] == 0
 
-a = [0.3272, -2.9940, 2.7218, -1.2259, -0.5683]
+def calculate_chlorophyl_image(image):
 
-lambda_green = 553.008
-lambda_blue = [444.176, 490.0, 507.18402]
-lambda_green_idx = -1
-lambda_blue_idx = [-1, -1, -1]
+	a = [0.3272, -2.9940, 2.7218, -1.2259, -0.5683]
 
-for i in range(0,len(hico_wl)):
-	if hico_wl[i] == lambda_green:
-		lambda_green_idx = i
-	if hico_wl[i] == lambda_blue[0]:
-		lambda_blue_idx[0] = i
-	if hico_wl[i] == lambda_blue[1]:
-		lambda_blue_idx[1] = i
-	if hico_wl[i] == lambda_blue[2]:
-		lambda_blue_idx[2] = i
+	lambda_green = 553.008
+	lambda_blue = [444.176, 490.0, 507.18402]
+	lambda_green_idx = -1
+	lambda_blue_idx = [-1, -1, -1]
 
-intensities = np.zeros((500,500))
+	for i in range(0,len(hico_wl)):
+		if hico_wl[i] == lambda_green:
+			lambda_green_idx = i
+		if hico_wl[i] == lambda_blue[0]:
+			lambda_blue_idx[0] = i
+		if hico_wl[i] == lambda_blue[1]:
+			lambda_blue_idx[1] = i
+		if hico_wl[i] == lambda_blue[2]:
+			lambda_blue_idx[2] = i
 
-H,W,L = HICO_original.shape
+	intensities = np.zeros((500,500))
 
-I = copy.deepcopy(HICO_original)
+	H,W,L = HICO_original.shape
 
-for i in range(0,H):
-	for j in range(0,W):
-		intensity = a[0]
-		numerator = max([ I[i,j,lambda_blue_idx[0]], I[i,j,lambda_blue_idx[1]], I[i,j,lambda_blue_idx[2]]])
-		denominator = I[i,j,lambda_green_idx]
-		for k in range(1,5):
-			intensity += a[k]*(math.log(numerator/denominator,10))**k
-		intensities[i,j] = 10**intensity
-intensities[land_mask] = 0
+	I = copy.deepcopy(HICO_original)
 
-print("low intensity: ", intensities[48,12])
-print("high intensity: ", intensities[33,207])
-print("medium intensity: ", intensities[133,11])
-plt.figure()
-plt.imshow(intensities)
-plt.show()
+	for i in range(0,H):
+		for j in range(0,W):
+			intensity = a[0]
+			numerator = max([ image[i,j,lambda_blue_idx[0]], image[i,j,lambda_blue_idx[1]], image[i,j,lambda_blue_idx[2]]])
+			denominator = image[i,j,lambda_green_idx]
+			for k in range(1,5):
+				intensity += a[k]*(math.log(numerator/denominator,10))**k
+			intensities[i,j] = intensity
+			print(intensity)
+
+	return intensities
+
+if __name__ == "__main__":
+	intensities = copy.deepcopy(HICO_original)
+	#intensities[land_mask] = 0
+	intensities = calculate_chlorophyl_image(intensities)
+	intensities[land_mask] = 0
+
+	print("low intensity: ", intensities[48,12])
+	print("high intensity: ", intensities[33,207])
+	print("medium intensity: ", intensities[133,11])
+	plt.figure()
+	plt.imshow(intensities)
+	plt.show()

@@ -7,46 +7,58 @@ import copy
 D = loadmat("../data/HICO.mat")
 hico_wl = D['hico_wl']
 HICO_original = D['HICO_original']
+valid_bands_Rrs   = np.loadtxt('../data/valid_bands_Rrs.txt')
+land_mask = plt.imread('../data/land_mask.png')[:,:,0] == 0
 
 I = copy.deepcopy(HICO_original)
 [H,W,L] = I.shape
 
-X = np.reshape(I, [H*W,L])
-print("shape X", X.shape)
+def calculate_k_means(image,k, only_valid_bands):
+	hico_wl = D['hico_wl']
+	H,W,L = image.shape
+	image[land_mask] = 0
+	X = np.reshape(image, [H*W,L])
 
-N_CLUSTERS = 9
+	if only_valid_bands==1:
+		for i in range(99,-1,-1):
+			# if should remove band
+			if valid_bands_Rrs[i] == 0:
+				X = np.delete(X, i, 1)
+				hico_wl = np.delete(hico_wl, i, 0)
 
-kmeans = KMeans(n_clusters=N_CLUSTERS).fit(X)
-labels = kmeans.labels_	
+	kmeans = KMeans(n_clusters=k).fit(X)
+	
+	labels = kmeans.labels_	
 
-print(kmeans.cluster_centers_.shape)
+	imag = np.zeros((500,500))
 
-imag = np.zeros((500,500))
+	for i in range(0,500):
+		for j in range(0,500):
+			imag[i,j] = labels[i*500+j]
 
-for i in range(0,500):
-	for j in range(0,500):
-		imag[i,j] = labels[i*500+j]
-
-#(y,x)
-print("south", imag[70,100])
-print("-", imag[30,100])
-print("north", imag[10,100])
-print(imag)
-plt.figure(1)
-
-plt.subplot(121)
-#(x,y)
-#plt.plot(100,70,'ro')
-#plt.plot(100,30,'bo')
-#plt.plot(100,10,'go')
-plt.imshow(imag)
+	return imag, kmeans, hico_wl
 
 
-plt.subplot(122)
-for i in range(0,N_CLUSTERS):
-	plt.plot(hico_wl, kmeans.cluster_centers_[i,:])
+if __name__ == "__main__":
+	N_CLUSTERS = 5
 
-plt.xlabel("Wavelenght [nm]")
-plt.ylabel("Radiance [$W/m^{-2}\mu m^{-1}sr^{-1}$]")
-plt.legend(np.arange(N_CLUSTERS));
-plt.show()
+	imag, kmeans, hico_wl = calculate_k_means(I,N_CLUSTERS,0)
+
+	plt.figure(1)
+
+	plt.subplot(121)
+	#(x,y)
+	#plt.plot(100,70,'ro')
+	#plt.plot(100,30,'bo')
+	#plt.plot(100,10,'go')
+	plt.imshow(imag)
+
+
+	plt.subplot(122)
+	for i in range(0, N_CLUSTERS):
+		plt.plot(hico_wl, kmeans.cluster_centers_[i,:])
+
+	plt.xlabel("Wavelenght [nm]")
+	plt.ylabel("Radiance [$W/m^{-2}\mu m^{-1}sr^{-1}$]")
+	plt.legend(np.arange(N_CLUSTERS));
+	plt.show()
