@@ -1,6 +1,9 @@
 from scipy.io import loadmat
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.decomposition import PCA
+
+import pca as pca
 
 def show_image(X):
     plt.imshow(np.reshape(X.T, [H,W,L]))
@@ -9,7 +12,7 @@ def error(X, X_ref):
     return np.mean(np.linalg.norm(X - X_ref, axis=0)) / \
         np.mean(np.linalg.norm(X_ref, axis=0))
 
-data = loadmat('data/task_3_case_1.mat') # Case 1
+data = loadmat("../data/task_3_case_1.mat") # Case 1
 # data = loadmat('data/task_3_case_2.mat') # Case 2
 
 I_noisy    = data['I_noisy']
@@ -20,11 +23,25 @@ X          = np.reshape(I_noisy, [H*W,L]).T
 X_original = np.reshape(I_original, [H*W,L]).T
 sigma      = np.cov(X)
 
+print sigma
+print sigma_n
+
 # Todo: Compute the MNF reconstruction of X
+eigs, eigenvectors = np.linalg.eig(sigma_n*np.linalg.inv(sigma))
+print eigs, eigenvectors
+A_transpose = np.linalg.inv(eigenvectors)
+Y = A_transpose*X.T
+
+print(X.shape)
+print(A_transpose.shape)
+
 X_hat_mnf = np.zeros(X.shape)
 
+
 # Todo: Compute the PCA reconstruction of X
-X_hat_pca = np.zeros(X.shape)
+pca = PCA(n_components=1)
+X_pca = pca.fit_transform(X.T)
+X_hat_pca = pca.inverse_transform(X_pca).T
 
 # Compute relative error (error), between 0 and 1
 error_mnf = error(X_hat_mnf, X_original)
