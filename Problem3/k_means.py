@@ -41,9 +41,9 @@ def calculate_k_means(image,k, only_valid_bands, mask_land):
 
 
 if __name__ == "__main__":
-	N_CLUSTERS = 5
-
-	imag, kmeans, hico_wl = calculate_k_means(I,N_CLUSTERS,0, 1)
+	N_CLUSTERS = 8
+	mask_land = 1
+	imag, kmeans, hico_wl = calculate_k_means(I,N_CLUSTERS,0, mask_land)
 
 	plt.figure(1)
 

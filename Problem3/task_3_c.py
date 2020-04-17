@@ -12,8 +12,8 @@ def error(X, X_ref):
     return np.mean(np.linalg.norm(X - X_ref, axis=0)) / \
         np.mean(np.linalg.norm(X_ref, axis=0))
 
-data = loadmat("../data/task_3_case_1.mat") # Case 1
-# data = loadmat('data/task_3_case_2.mat') # Case 2
+#data = loadmat("../data/task_3_case_1.mat") # Case 1
+data = loadmat("../data/task_3_case_2.mat") # Case 2
 
 I_noisy    = data['I_noisy']
 I_original = data['I_original']
@@ -23,23 +23,28 @@ X          = np.reshape(I_noisy, [H*W,L]).T
 X_original = np.reshape(I_original, [H*W,L]).T
 sigma      = np.cov(X)
 
-print sigma
-print sigma_n
+
+print(sigma)
+print(sigma_n)
 
 # Todo: Compute the MNF reconstruction of X
-eigs, eigenvectors = np.linalg.eig(sigma_n*np.linalg.inv(sigma))
-print eigs, eigenvectors
-A_transpose = np.linalg.inv(eigenvectors)
-Y = A_transpose*X.T
+eigs, V = np.linalg.eig(np.matmul(sigma_n, np.linalg.inv(sigma)))
 
-print(X.shape)
-print(A_transpose.shape)
+# sort the eigs and corr V
+idx = np.argsort(eigs)
+eigs = eigs[idx]
+V = V[:,idx]
 
-X_hat_mnf = np.zeros(X.shape)
+print("eigs: ", eigs)
 
+A_transpose = np.linalg.inv(V)
+Y = np.matmul(A_transpose, X)
+
+P = 2
+X_hat_mnf = np.matmul(V[:,0:P],Y[0:P,:])
 
 # Todo: Compute the PCA reconstruction of X
-pca = PCA(n_components=1)
+pca = PCA(n_components=P)
 X_pca = pca.fit_transform(X.T)
 X_hat_pca = pca.inverse_transform(X_pca).T
 

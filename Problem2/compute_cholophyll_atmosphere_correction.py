@@ -37,9 +37,10 @@ CL = chl.calculate_chlorophyl_image(I_corrected)
 CL[land_mask] = 0
 
 # kmeans
-N_CLUSTERS = 9
+N_CLUSTERS = 8
 ONLY_VALID_BANDS = 1
-imag, kmeans, hico_wl = kmean.calculate_k_means(I_corrected, N_CLUSTERS, ONLY_VALID_BANDS)
+mask_land = 1
+imag, kmeans, hico_wl = kmean.calculate_k_means(I_corrected, N_CLUSTERS, ONLY_VALID_BANDS, mask_land)
 
 
 plt.figure()

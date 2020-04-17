@@ -41,9 +41,20 @@ def calculate_k_means(image,k, only_valid_bands, mask_land):
 
 
 if __name__ == "__main__":
-	N_CLUSTERS = 5
+	N_CLUSTERS = 9
 
-	imag, kmeans, hico_wl = calculate_k_means(I,N_CLUSTERS,0, 1)
+	imag, kmeans, hico_wl = calculate_k_means(I,N_CLUSTERS,0, 0)
+
+	print(kmeans.cluster_centers_.shape)
+
+	print hico_wl
+
+	for i in range(0,100):
+		if (hico_wl[i] == 805.04):
+			n = i
+
+	print kmeans.cluster_centers_[:,n]
+	print kmeans.labels_[n]
 
 	plt.figure(1)
 
